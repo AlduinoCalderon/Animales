@@ -13,10 +13,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 const driver = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "123"));
 const session = driver.session();
-
 app.get('/', function(req, res) {
     session
         .run("MATCH (n:Person) RETURN n")
