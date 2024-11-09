@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animales que necesitan ayuda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .help-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around; 
+            background-color: #baebbb;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 8px;
+        }
+
+        .help-section h2 {
+            font-size: 22px;
+            color: #333;
+            text-align: center;
+            width: 100%;
+        }
+
+        .help-section .animal-help-card {
+            width: 18%; 
+            margin-bottom: 10px;
+            display: flex;
+            padding: 5px; 
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            transition: transform 0.3s; 
+        }
+
+        .help-section .animal-help-card img {
+            width: 100px; 
+            height: auto; 
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .help-section .animal-help-card p {
+            font-size: 18px; 
+            color: #555;
+            flex-grow: 1;
+            text-align: justify;
+        }
+
+        .help-section .animal-help-card .help-button {
+            background-color: #777;
+            color: white;
+            padding: 5px 8px; 
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px; 
+        }
+
+        .help-section .animal-help-card .help-button:hover {
+            background-color: #98d59b;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #64e168;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+       
+        @media (max-width: 768px) {
+            .help-section .animal-help-card {
+                width: 40%; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            .help-section .animal-help-card {
+                width: 100%; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Animales que necesitan ayuda</h1>
+</header>
+
+<div class="container">
+    <div class="help-section">
+        <h2>Posibles animales a los que puedes ayudar</h2>
+
+        
+        <div class="animal-help-card">
+            <img src="imagenes/Canelita.jpg" alt="Canelita">
+            <p><strong>Canelita</strong></p>
+            <p>Canelita está lista para irse a su nuevo hogar. ¡Dale la oportunidad de tener una vida llena de amor!</p>
+            <button class="help-button">Adoptar a Canelita</button>
+        </div>
+
+        
+        <div class="animal-help-card">
+            <img src="imagenes/Tinta.jpg" alt="Tinta">
+            <p><strong>Tinta</strong></p>
+            <p>Tinta está en situación de calle y busca dónde quedarse. ¡Puedes ayudarla proporcionándole un hogar temporal!</p>
+            <button class="help-button">Ayudar a Tinta</button>
+        </div>
+
+        
+        <div class="animal-help-card">
+            <img src="imagenes/Panchito.jpg" alt="Panchito">
+            <p><strong>Panchito</strong></p>
+            <p>Panchito necesita apoyo económico para desparacirtarlo. ¡Ayúdanos a juntar fondos!</p>
+            <button class="help-button">Padrino para Panchito</button>
+        </div>
+    </div>
+
+   
+    <a href="usuario.html" class="back-link">Ver tu perfil</a>
+    <a href="animal.html" class="back-link">Ver detalles de los animalitos</a>
+</div>
+
+</body>
+</html>
