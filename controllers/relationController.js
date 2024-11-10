@@ -9,7 +9,7 @@ const createRelation = async (req, res) => {
     console.log('Entrando en createRelation'); 
     const { userId, animalId, relationType, relationData } = req.body;
 
-    // Imprimir los datos recibidos en la solicitud
+    // Imprimir los datos recibidos en la solicitud.
     console.log('Datos recibidos:', { userId, animalId, relationType, relationData });
 
     const allowedRelations = ['ADOPTED', 'RESCUED', 'SPONSORED', 'TEMPORARY_CARE', 'VETERINARIAN'];
@@ -53,9 +53,6 @@ const createRelation = async (req, res) => {
         res.status(500).json({ message: 'Error creando la relación' });
     }
 };
-
-
-
 // Leer relación
 const getRelation = async (req, res) => {
     const { userId, animalId, relationType } = req.params;
@@ -80,7 +77,6 @@ const getRelation = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving relation' });
     }
 };
-
 // Actualizar relación
 const updateRelation = async (req, res) => {
     const { userId, animalId, oldRelationType } = req.params;
@@ -142,8 +138,36 @@ const updateRelation = async (req, res) => {
         session.close(); // Cerrar la sesión
     }
 };
+const getAnimalRelations = async (req, res) => {
+    const { animalId } = req.params;
 
+    try {
+        const result = await session.run(
+            'MATCH (a:Animal {id_animal: $animalId})<-[r]-(p:Person) RETURN r, p', 
+            { animalId }  // Usamos parámetros para evitar la inyección
+        );
 
+        if (result.records.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron relaciones para este animal' });
+        }
+
+        const relations = result.records.map(record => {
+            return {
+                relationType: record.get('r').type,
+                relationData: record.get('r').properties,
+                person: record.get('p').properties
+            };
+        });
+
+        res.status(200).json({
+            message: 'Relaciones obtenidas correctamente',
+            data: relations
+        });
+    } catch (error) {
+        console.error('Error al obtener relaciones:', error);
+        res.status(500).json({ message: 'Error obteniendo relaciones' });
+    }
+};
 // Eliminar relación
 const deleteRelation = async (req, res) => {
     const { userId, animalId, relationType } = req.params;
@@ -167,10 +191,37 @@ const deleteRelation = async (req, res) => {
         res.status(500).json({ message: 'Error deleting relation' });
     }
 };
+// Este es un ejemplo general usando Neo4j
+// Modifica la función getAnimalRelationsCount
+const getAnimalRelationsCount = async (req, res) => {
+    const { animalId } = req.params;  // Accedemos al animalId de los parámetros de la ruta
+
+    try {
+        // Consulta a la base de datos para contar las relaciones
+        const count = await session.run(
+            `MATCH (animal:Animal)-[:HAS_RELATION]->(person)
+            WHERE animal.id_animal = $animalId
+            RETURN count(*) as relationCount`,
+            { animalId }
+        );
+
+        const relationCount = count.records[0].get('relationCount');
+        res.status(200).json({
+            message: 'Conteo de relaciones obtenido correctamente',
+            data: { relationCount }
+        });
+    } catch (error) {
+        console.error('Error al obtener el conteo de relaciones:', error);
+        res.status(500).json({ message: 'Error al obtener el conteo de relaciones' });
+    }
+};
+
 
 // Exportar funciones
 module.exports = {
     createRelation,
+    getAnimalRelations,
+    getAnimalRelationsCount,
     getRelation,
     updateRelation,
     deleteRelation

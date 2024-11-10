@@ -31,7 +31,7 @@ const getAllAnimals = async (req, res) => {
 const getAnimalById = async (req, res) => {
     const id = req.params.id; // UUID no necesita parseInt
     try {
-        const result = await session.run(`MATCH (a:Animal {id_animal: $id}) RETURN a`, { id });
+        const result = await session.run('MATCH (a:Animal {id_animal: $id}) RETURN a', { id });
         if (result.records.length === 0) {
             return res.status(404).json({ error: 'Animal not found' });
         }
