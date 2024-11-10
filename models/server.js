@@ -4,9 +4,9 @@ const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const personRoutes = require('../routes/personRoutes');
-const animalRoutes = require('../routes/animalRoutes');
-
+const personRoutes = require('../routes/personRoutes').default;
+const animalRoutes = require('../routes/animalRoutes').default;
+const relationRoutes = require('../routes/relationRoutes').default;
 const app = express();
 
 // Middleware
@@ -24,7 +24,7 @@ app.set('view engine', 'ejs'); // Establece EJS como el motor de plantillas
 // Rutas
 app.use('/persons', personRoutes); // Ruta para gestionar personas
 app.use('/animals', animalRoutes); // Ruta para gestionar animales
-
+app.use('/relations', relationRoutes);
 // Iniciar servidor
 const PORT = process.env.PORT || 3000; // Se puede configurar el puerto desde una variable de entorno
 app.listen(PORT, () => {
