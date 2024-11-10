@@ -10,7 +10,6 @@ const animalRoutes = require('./routes/animalRoutes');
 require('dotenv').config();  // Para cargar las variables de entorno desde un archivo .env
 
 const app = express();
-
 // Middleware
 app.use(cors());
 app.set('views', path.join(__dirname, 'views'));

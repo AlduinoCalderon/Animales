@@ -1,35 +1,14 @@
-const neo4j = require('neo4j-driver');  // Cambié aquí para usar la nueva versión
+const neo4j = require('neo4j-driver');
+const { v4: uuidv4 } = require('uuid');
 
-// Crear una conexión a Neo4j
 const driver = neo4j.driver(
-    'bolt://localhost', 
-    neo4j.auth.basic('neo4j', 'password')  // Credenciales de conexión
+    'bolt://localhost',
+    neo4j.auth.basic('neo4j', 'password')
 );
 
-const session = driver.session();  // Crear una nueva sesión
+const session = driver.session();
 
-// Obtener una persona por ID (solo no eliminadas)
-// Obtener una persona por ID (solo no eliminadas)
-const getPersonById = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const result = await session.run(
-            'MATCH (p:Person {id: $id}) RETURN p',
-            { id }
-        );
-        if (result.records.length === 0) {
-            return res.status(404).json({ error: 'Person not found' });  // Asegúrate de usar status primero
-        }
-        const person = result.records[0].get('p').properties;
-        res.status(200).json(person);  // Devolver los datos de la persona en formato JSON
-    } catch (error) {
-        console.error('Error retrieving person by id:', error);
-        res.status(500).json({ error: 'Error retrieving person by id' });  // Asegúrate de usar status primero
-    }
-};
-
-
-// Obtener todas las personas (solo no eliminadas)
+// Obtener todas las personas
 const getAllPersons = async (req, res) => {
     try {
         const result = await session.run('MATCH (p:Person {deleted: false}) RETURN p');
@@ -42,16 +21,33 @@ const getAllPersons = async (req, res) => {
             phone: record.get('p').properties.phone,
             email: record.get('p').properties.email
         }));
-        res.json(persons);  // Devolver la lista de personas en formato JSON
+        res.json(persons);
     } catch (error) {
         console.error('Error retrieving persons:', error);
         res.status(500).json({ error: 'Error retrieving persons' });
     }
 };
 
+// Obtener una persona por ID
+const getPersonById = async (req, res) => {
+    const id = req.params.id; // UUID no necesita parseInt
+    try {
+        const result = await session.run(`MATCH (p:Person {id: $id}) RETURN p`, { id });
+        if (result.records.length === 0) {
+            return res.status(404).json({ error: 'Person not found' });
+        }
+        const person = result.records[0].get('p').properties;
+        res.json(person);
+    } catch (error) {
+        console.error('Error retrieving person by id:', error);
+        res.status(500).json({ error: 'Error retrieving person by id' });
+    }
+};
+
 // Crear una persona
 const createPerson = async (req, res) => {
-    const { id, first_name, last_name, mother_last_name, address, phone, email } = req.body;
+    const { first_name, last_name, mother_last_name, address, phone, email } = req.body;
+    const id = uuidv4();  // Generar UUID
     try {
         const result = await session.run(
             'CREATE (p:Person {id: $id, first_name: $first_name, last_name: $last_name, mother_last_name: $mother_last_name, address: $address, phone: $phone, email: $email, deleted: false}) RETURN p',
@@ -64,14 +60,49 @@ const createPerson = async (req, res) => {
     }
 };
 
-// Actualizar persona
+// Actualizar una persona parcialmente
 const updatePerson = async (req, res) => {
-    const { id } = req.params;
-    const { first_name, last_name, mother_last_name, address, phone, email } = req.body;
+    const id = req.params.id; // UUID no necesita parseInt
+    const { first_name, last_name, mother_last_name, address, phone, email, deleted } = req.body;
+    const setStatements = [];
+    const params = { id };
+
+    if (first_name) {
+        setStatements.push('p.first_name = $first_name');
+        params.first_name = first_name;
+    }
+    if (last_name) {
+        setStatements.push('p.last_name = $last_name');
+        params.last_name = last_name;
+    }
+    if (mother_last_name) {
+        setStatements.push('p.mother_last_name = $mother_last_name');
+        params.mother_last_name = mother_last_name;
+    }
+    if (address) {
+        setStatements.push('p.address = $address');
+        params.address = address;
+    }
+    if (phone) {
+        setStatements.push('p.phone = $phone');
+        params.phone = phone;
+    }
+    if (email) {
+        setStatements.push('p.email = $email');
+        params.email = email;
+    }
+    if (deleted !== undefined) {
+        setStatements.push('p.deleted = $deleted');
+        params.deleted = deleted;
+    }
+    if (setStatements.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
     try {
         const result = await session.run(
-            'MATCH (p:Person {id: $id, deleted: false}) SET p.first_name = $first_name, p.last_name = $last_name, p.mother_last_name = $mother_last_name, p.address = $address, p.phone = $phone, p.email = $email RETURN p',
-            { id, first_name, last_name, mother_last_name, address, phone, email }
+            `MATCH (p:Person {id: $id}) SET ${setStatements.join(', ')} RETURN p`,
+            params
         );
         if (result.records.length === 0) {
             return res.status(404).json({ error: 'Person not found' });
@@ -83,9 +114,9 @@ const updatePerson = async (req, res) => {
     }
 };
 
-// Eliminar persona (borrado lógico)
+// Eliminar una persona (marcar como eliminada)
 const deletePerson = async (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id; // UUID no necesita parseInt
     try {
         const result = await session.run(
             'MATCH (p:Person {id: $id, deleted: false}) SET p.deleted = true RETURN p',
@@ -102,7 +133,7 @@ const deletePerson = async (req, res) => {
 };
 
 module.exports = {
-    createPerson, 
+    createPerson,
     getPersonById,
     updatePerson,
     deletePerson,
