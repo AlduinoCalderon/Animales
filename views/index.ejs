@@ -1,13 +1,7 @@
-<h3>Agregar personas</h3>
-<form method="POST" action="/person/add">
-    <input type="text" name="name" placeholder="Nombre">
-    <input type="submit" value="Enviar">
-</form>
-
-
 <h1>Lista de Personas</h1>
-    <ul>
-        <% persons.forEach(function(person){ %>
-        <li><%=person.name %></li>
-        <%}) %>
+<ul>
+    <% persons.forEach(function(person){ %>
+        <li><%= person.first_name %> <%= person.last_name %> - <a href="/person/<%= person.id %>">Ver detalles</a></li>
+    <% }) %>
 </ul>
+<a href="/person/new">Crear Nueva Persona</a>

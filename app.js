@@ -1,11 +1,18 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-const neo4j = require('neo4j-driver');
-var addRouter = require('./person/add'); 
-var app = express();
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const neo4j = require('./database/neo4j');  // Importar el driver de la base de datos
+const personRoutes = require('./routes/personRoutes');
+const animalRoutes = require('./routes/animalRoutes');
+require('dotenv').config();  // Para cargar las variables de entorno desde un archivo .env
+
+const app = express();
+
+// Middleware
+app.use(cors());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(logger('dev'));
@@ -13,46 +20,46 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-const driver = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "123"));
-const session = driver.session();
-app.get('/', function(req, res) {
-    session
-        .run("MATCH (n:Person) RETURN n")
-        .then(function(result) {
-            var personArr = [];
-            result.records.forEach(function(record) {
-                personArr.push({
-                    id: record._fields[0].identity.low,
-                    name: record._fields[0].properties.name
-                });
-            });
-            res.render('index', { persons: personArr });
-        })
-        .catch(function(error) {
-            console.log(error);
-            res.status(500).send('Error en la consulta');
-        });
+
+// Crear una nueva sesión con el driver de Neo4j
+let session;
+try {
+    session = neo4j.session();  // Usar el método session() desde el archivo neo4j.js
+    console.log('Conexión exitosa a Neo4j');
+} catch (error) {
+    console.error('Error al conectar a Neo4j:', error);
+}
+
+// Guardar la sesión en las variables locales para acceso global
+app.locals.session = session;
+
+// Usar las rutas
+app.use('/persons', personRoutes);
+app.use('/animals', animalRoutes);
+app.get('/', (req, res) => {
+    res.redirect('/persons');
 });
 
-app.use('/person/add', addRouter); // Usa el router para manejar /person/add
-
-app.post('/person/add', function(req, res) {
-    var name = req.body.name;
-    
-    session
-        .run("CREATE (n:Person {name: $nameParam}) RETURN n", { nameParam: name })
-        .then(function(result) {
-            console.log("Persona agregada:", result.records[0].get(0).properties.name);
-            res.redirect('/');
-        })
-        .catch(function(error) {
-            console.log(error);
-            res.status(500).send('Error al agregar persona');
-        });
+// Manejo de errores globales
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Algo salió mal!');
 });
 
-app.listen(3000, () => {
-    console.log('Server started on port 3000');
+// Cerrar la sesión y el controlador de Neo4j cuando el servidor se apague
+process.on('SIGINT', () => {
+    if (session) {
+        session.close();
+    }
+    neo4j.close();  // Cerrar la conexión al controlador de Neo4j
+    console.log('Conexión a Neo4j cerrada');
+    process.exit(0);
+});
+
+// Iniciar servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
 });
 
 module.exports = app;

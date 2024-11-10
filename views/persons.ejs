@@ -1,0 +1,30 @@
+<h3>Agregar Persona</h3>
+<form method="POST" action="/persons/add">
+    <input type="text" name="firstName" placeholder="Nombre" required>
+    <input type="text" name="lastName" placeholder="Apellido" required>
+    <input type="text" name="address" placeholder="Dirección">
+    <input type="text" name="phone" placeholder="Teléfono">
+    <input type="email" name="email" placeholder="Correo">
+    <button type="submit">Agregar</button>
+</form>
+
+<h1>Lista de Personas y sus Relaciones</h1>
+<ul>
+    <% persons.forEach(person => { %>
+        <li>
+            <strong><%= person.first_name %> <%= person.last_name %></strong>
+            <ul>
+                <li>Dirección: <%= person.address %></li>
+                <li>Teléfono: <%= person.phone %></li>
+                <li>Email: <%= person.email %></li>
+                <li>Relaciones:
+                    <ul>
+                        <% person.relations.forEach((relation, index) => { %>
+                            <li><%= relation %> - <%= person.animals[index] %></li>
+                        <% }) %>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    <% }) %>
+</ul>

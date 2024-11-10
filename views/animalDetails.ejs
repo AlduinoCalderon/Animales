@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles de los Animalito</title>
+    <title>Detalles del Animalito</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -84,22 +84,22 @@
 <body>
 
 <header>
-    <h1>Detalles de los Animalito</h1>
+    <h1>Detalles del Animalito</h1>
 </header>
 
 <div class="animal-details">
-    <img src="imagenes/Canelita.jpg" alt="Canelita">
-    <h2>Canelita</h2>
-    <p>Canelita fue rescatada de la calle y está lista para encontrar un hogar lleno de amor. Es una perrita muy cariñosa y juguetona, ideal para una familia.</p>
+    <!-- Usamos EJS para mostrar dinámicamente los detalles del animal -->
+    <img src="<%= animal.image_url %>" alt="<%= animal.name %>">
+    <h2><%= animal.name %></h2>
+    <p><%= animal.description %></p>
 
     <div class="node-section">
         <h3>Información de Rescate y Adopción</h3>
-        <p><strong>Rescatado por:</strong> Juan Pérez</p>
+        <p><strong>Rescatado por:</strong> <%= animal.rescuer %></p>
     </div>
 </div>
 
-
-<a href="ayudaanimal.html" class="back-link">Volver a la lista de animales</a>
+<a href="/animals" class="back-link">Volver a la lista de animales</a>
 
 </body>
 </html>
