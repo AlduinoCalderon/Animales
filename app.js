@@ -21,10 +21,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Crear una nueva sesión con el driver de Neo4j
+// Crear una nueva sesión con el driver de Neo4j 
+const driver = require('./database/neo4j');  // Importar el driver desde neo4j.js
+
 let session;
 try {
-    session = neo4j.session();  // Usar el método session() desde el archivo neo4j.js
+    session = driver.session();  // Crear una sesión usando el driver
     console.log('Conexión exitosa a Neo4j');
 } catch (error) {
     console.error('Error al conectar a Neo4j:', error);
@@ -37,7 +39,7 @@ app.locals.session = session;
 app.use('/persons', personRoutes);
 app.use('/animals', animalRoutes);
 app.get('/', (req, res) => {
-    res.redirect('/persons');
+    res.redirect('/animals');
 });
 
 // Manejo de errores globales
