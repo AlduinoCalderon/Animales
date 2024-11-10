@@ -3,12 +3,12 @@ const router = express.Router();
 const relationController = require('../controllers/relationController');
 
 // Crear relación
-router.post('/relations', relationController.createRelation);
+router.post('/', relationController.createRelation);
 // Obtener relación
-router.get('/relations/:userId/:animalId/:relationType', relationController.getRelation);
+router.get('/:userId/:animalId/:relationType', relationController.getRelation);
 // Actualizar relación
-router.put('/relations', relationController.updateRelation);
+router.put('/:userId/:animalId/:relationType', relationController.updateRelation);
 // Eliminar relación
-router.delete('/relations/:userId/:animalId/:relationType', relationController.deleteRelation);
+router.delete('/:userId/:animalId/:relationType', relationController.deleteRelation);
 
-export default router;
+module.exports = router;

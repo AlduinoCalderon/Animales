@@ -83,15 +83,48 @@ const getRelation = async (req, res) => {
 
 // Actualizar relación
 const updateRelation = async (req, res) => {
-    const { userId, animalId, relationType, relationData } = req.body;
+    const { userId, animalId, oldRelationType } = req.params;
+    const { relationType, relationData } = req.body;
+    const allowedRelations = ['ADOPTED', 'RESCUED', 'SPONSORED', 'TEMPORARY_CARE', 'VETERINARIAN'];
+
+    // Validación de tipo de relación
+    if (!allowedRelations.includes(relationType)) {
+        console.log('Tipo de relación no válido');
+        return res.status(400).json({ message: 'Tipo de relación no válido' });
+    }
+
+    // Validar que relationData sea un objeto
+    if (typeof relationData !== 'object' || relationData === null) {
+        console.log('relationData no es un objeto válido', relationData);
+        return res.status(400).json({ message: 'relationData debe ser un objeto válido' });
+    }
+
+    // Formatear relationData para Cypher
+    const formattedRelationData = Object.keys(relationData)
+        .map(key => `${key}: "${relationData[key]}"`)
+        .join(', ');
+
+    const session = driver.session(); // Iniciar sesión
+    const tx = session.beginTransaction(); // Iniciar transacción
 
     try {
-        const result = await session.run(
-            `MATCH (p:Person {id: $userId})-[r:${relationType}]-(a:Animal {id_animal: $animalId}) 
-             SET r += $relationData 
-             RETURN p, r, a`,
-            { userId, animalId, relationType, relationData }
+        // Eliminar relación anterior si el tipo cambió
+    if ((oldRelationType)&& oldRelationType !== relationType) {
+            await tx.run(
+                `MATCH (p:Person {id: $userId})-[r:${oldRelationType}]->(a:Animal {id_animal: $animalId}) DELETE r`,
+                { userId, animalId }
+            );
+        }
+
+        // Crear o actualizar la relación nueva
+        const result = await tx.run(
+            `MATCH (p:Person {id: $userId}), (a:Animal {id_animal: $animalId}) 
+             MERGE (p)-[r:${relationType} {${formattedRelationData}}]->(a)
+             RETURN p, a;`,
+            { userId, animalId }
         );
+
+        await tx.commit(); // Confirmar la transacción
 
         if (result.records.length === 0) {
             return res.status(404).json({ message: 'Relación no encontrada' });
@@ -102,10 +135,14 @@ const updateRelation = async (req, res) => {
             data: result.records
         });
     } catch (error) {
+        await tx.rollback(); // Revertir cambios en caso de error
         console.error('Error updating relation:', error);
         res.status(500).json({ message: 'Error updating relation' });
+    } finally {
+        session.close(); // Cerrar la sesión
     }
 };
+
 
 // Eliminar relación
 const deleteRelation = async (req, res) => {
