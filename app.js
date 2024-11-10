@@ -5,8 +5,8 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const neo4j = require('./database/neo4j');  // Importar el driver de la base de datos
-const personRoutes = require('./routes/personRoutes').default;
-const animalRoutes = require('./routes/animalRoutes').default;
+const personRoutes = require('./routes/personRoutes');
+const animalRoutes = require('./routes/animalRoutes');
 require('dotenv').config();  // Para cargar las variables de entorno desde un archivo .env
 
 const app = express();
