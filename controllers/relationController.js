@@ -48,6 +48,8 @@ const createRelation = async (req, res) => {
     } catch (error) {
         console.error('Error al crear la relación:', error);
         res.status(500).json({ message: 'Error creando la relación' });
+    }finally {
+        await session.close();
     }
 };
 // Leer relación
@@ -73,6 +75,8 @@ const getRelation = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving relation:', error);
         res.status(500).json({ message: 'Error retrieving relation' });
+    }finally {
+        await session.close();
     }
 };
 // Actualizar relación
@@ -164,6 +168,8 @@ const getAnimalRelations = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener relaciones:', error);
         res.status(500).json({ message: 'Error obteniendo relaciones' });
+    }finally {
+        await session.close();
     }
 };
 // Eliminar relación
@@ -188,17 +194,19 @@ const deleteRelation = async (req, res) => {
     } catch (error) {
         console.error('Error deleting relation:', error);
         res.status(500).json({ message: 'Error deleting relation' });
+    }finally {
+        await session.close();
     }
 };
 // Este es un ejemplo general usando Neo4j
 // Modifica la función getAnimalRelationsCount
 const getPersonRelations = async (req, res) => {
     const session = driver.session();
-    const { personId } = req.params.personId;
+    const { personId } = req.params; // Corrección aquí
 
     try {
         const result = await session.run(
-            'MATCH (a:Animal)-[r]-(p:Person{id: $personId}) RETURN a, r', 
+            'MATCH (a:Animal)-[r]-(p:Person {id: $personId}) RETURN a, r',
             { personId }  
         );
 
@@ -221,8 +229,11 @@ const getPersonRelations = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener relaciones:', error);
         res.status(500).json({ message: 'Error obteniendo relaciones' });
+    } finally {
+        await session.close();
     }
 };
+
 
 
 // Exportar funciones

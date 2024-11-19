@@ -1,10 +1,9 @@
 const { v4: uuidv4 } = require('uuid');
-const driver = require('../database/neo4j');  // Importa el driver de la conexión
-
-const session = driver.session();
+const driver = require('../database/neo4j'); // Importa el driver de la conexión
 
 // Obtener todas las personas
 const getAllPersons = async (req, res) => {
+    const session = driver.session();
     try {
         const result = await session.run('MATCH (p:Person {deleted: false}) RETURN p');
         const persons = result.records.map(record => ({
@@ -20,11 +19,14 @@ const getAllPersons = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving persons:', error);
         res.status(500).json({ error: 'Error retrieving persons' });
+    } finally {
+        await session.close();
     }
 };
 
 // Obtener una persona por ID
 const getPersonById = async (req, res) => {
+    const session = driver.session();
     const id = req.params.id;
     try {
         const result = await session.run('MATCH (p:Person {id: $id}) RETURN p', { id });
@@ -36,15 +38,18 @@ const getPersonById = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving person by id:', error);
         res.status(500).json({ error: 'Error retrieving person by id' });
+    } finally {
+        await session.close();
     }
 };
 
 // Crear una persona
 const createPerson = async (req, res) => {
+    const session = driver.session();
     const { first_name, last_name, mother_last_name, address, phone, email } = req.body;
     const id = uuidv4();
     try {
-        const result = await session.run(
+        await session.run(
             'CREATE (p:Person {id: $id, first_name: $first_name, last_name: $last_name, mother_last_name: $mother_last_name, address: $address, phone: $phone, email: $email, deleted: false}) RETURN p',
             { id, first_name, last_name, mother_last_name, address, phone, email }
         );
@@ -52,11 +57,14 @@ const createPerson = async (req, res) => {
     } catch (error) {
         console.error('Error creating person:', error);
         res.status(500).json({ error: 'Error creating person' });
+    } finally {
+        await session.close();
     }
 };
 
 // Actualizar una persona parcialmente
 const updatePerson = async (req, res) => {
+    const session = driver.session();
     const id = req.params.id;
     const { first_name, last_name, mother_last_name, address, phone, email, deleted } = req.body;
     const setStatements = [];
@@ -106,11 +114,14 @@ const updatePerson = async (req, res) => {
     } catch (error) {
         console.error('Error updating person:', error);
         res.status(500).json({ error: 'Error updating person' });
+    } finally {
+        await session.close();
     }
 };
 
 // Eliminar una persona (marcar como eliminada)
 const deletePerson = async (req, res) => {
+    const session = driver.session();
     const id = req.params.id;
     try {
         const result = await session.run(
@@ -124,6 +135,8 @@ const deletePerson = async (req, res) => {
     } catch (error) {
         console.error('Error deleting person:', error);
         res.status(500).json({ error: 'Error deleting person' });
+    } finally {
+        await session.close();
     }
 };
 
