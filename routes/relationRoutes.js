@@ -13,6 +13,6 @@ router.delete('/:userId/:animalId/:relationType', relationController.deleteRelat
 // Obtener todas las relaciones de un animal
 router.get('/:animalId', relationController.getAnimalRelations);
 
-router.get('person/:personId', relationController.getPersonRelations);
+router.get('/person/:personId', relationController.getPersonRelations);
 
 module.exports = router;
