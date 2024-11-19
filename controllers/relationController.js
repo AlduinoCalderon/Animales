@@ -194,7 +194,7 @@ const deleteRelation = async (req, res) => {
 // Modifica la función getAnimalRelationsCount
 const getAnimalRelationsCount = async (req, res) => {
     const session = driver.session();
-    const { animalId } = req.params.id;  // Accedemos al animalId de los parámetros de la ruta
+    const { animalId } = req.params.animalId;  // Accedemos al animalId de los parámetros de la ruta
     try {
         // Consulta a la base de datos para contar las relaciones
         const count = await session.run(
