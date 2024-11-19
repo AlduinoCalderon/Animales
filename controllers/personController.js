@@ -1,10 +1,5 @@
-const neo4j = require('neo4j-driver');
 const { v4: uuidv4 } = require('uuid');
-
-const driver = neo4j.driver(
-    'bolt://localhost',
-    neo4j.auth.basic('neo4j', 'password')
-);
+const driver = require('../database/neo4j');  // Importa el driver de la conexión
 
 const session = driver.session();
 
@@ -30,9 +25,9 @@ const getAllPersons = async (req, res) => {
 
 // Obtener una persona por ID
 const getPersonById = async (req, res) => {
-    const id = req.params.id; // UUID no necesita parseInt
+    const id = req.params.id;
     try {
-        const result = await session.run(`MATCH (p:Person {id: $id}) RETURN p`, { id });
+        const result = await session.run('MATCH (p:Person {id: $id}) RETURN p', { id });
         if (result.records.length === 0) {
             return res.status(404).json({ error: 'Person not found' });
         }
@@ -47,7 +42,7 @@ const getPersonById = async (req, res) => {
 // Crear una persona
 const createPerson = async (req, res) => {
     const { first_name, last_name, mother_last_name, address, phone, email } = req.body;
-    const id = uuidv4();  // Generar UUID
+    const id = uuidv4();
     try {
         const result = await session.run(
             'CREATE (p:Person {id: $id, first_name: $first_name, last_name: $last_name, mother_last_name: $mother_last_name, address: $address, phone: $phone, email: $email, deleted: false}) RETURN p',
@@ -62,7 +57,7 @@ const createPerson = async (req, res) => {
 
 // Actualizar una persona parcialmente
 const updatePerson = async (req, res) => {
-    const id = req.params.id; // UUID no necesita parseInt
+    const id = req.params.id;
     const { first_name, last_name, mother_last_name, address, phone, email, deleted } = req.body;
     const setStatements = [];
     const params = { id };
@@ -116,7 +111,7 @@ const updatePerson = async (req, res) => {
 
 // Eliminar una persona (marcar como eliminada)
 const deletePerson = async (req, res) => {
-    const id = req.params.id; // UUID no necesita parseInt
+    const id = req.params.id;
     try {
         const result = await session.run(
             'MATCH (p:Person {id: $id, deleted: false}) SET p.deleted = true RETURN p',

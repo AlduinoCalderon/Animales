@@ -1,11 +1,8 @@
-const neo4j = require('neo4j-driver');
-const driver = neo4j.driver(
-    'bolt://localhost',
-    neo4j.auth.basic('neo4j', 'password')
-);
-const session = driver.session();
+const driver = require('../database/neo4j'); 
+
 // Crear relación
 const createRelation = async (req, res) => {
+    const session = driver.session();
     console.log('Entrando en createRelation'); 
     const { userId, animalId, relationType, relationData } = req.body;
 
@@ -55,6 +52,7 @@ const createRelation = async (req, res) => {
 };
 // Leer relación
 const getRelation = async (req, res) => {
+    const session = driver.session();
     const { userId, animalId, relationType } = req.params;
 
     try {
@@ -79,6 +77,7 @@ const getRelation = async (req, res) => {
 };
 // Actualizar relación
 const updateRelation = async (req, res) => {
+    const session = driver.session();
     const { userId, animalId, oldRelationType } = req.params;
     const { relationType, relationData } = req.body;
     const allowedRelations = ['ADOPTED', 'RESCUED', 'SPONSORED', 'TEMPORARY_CARE', 'VETERINARIAN'];
@@ -99,8 +98,6 @@ const updateRelation = async (req, res) => {
     const formattedRelationData = Object.keys(relationData)
         .map(key => `${key}: "${relationData[key]}"`)
         .join(', ');
-
-    const session = driver.session(); // Iniciar sesión
     const tx = session.beginTransaction(); // Iniciar transacción
 
     try {
@@ -139,6 +136,7 @@ const updateRelation = async (req, res) => {
     }
 };
 const getAnimalRelations = async (req, res) => {
+    const session = driver.session();
     const { animalId } = req.params;
 
     try {
@@ -170,6 +168,7 @@ const getAnimalRelations = async (req, res) => {
 };
 // Eliminar relación
 const deleteRelation = async (req, res) => {
+    const session = driver.session();
     const { userId, animalId, relationType } = req.params;
 
     try {
@@ -194,6 +193,7 @@ const deleteRelation = async (req, res) => {
 // Este es un ejemplo general usando Neo4j
 // Modifica la función getAnimalRelationsCount
 const getAnimalRelationsCount = async (req, res) => {
+    const session = driver.session();
     const { animalId } = req.params;  // Accedemos al animalId de los parámetros de la ruta
 
     try {
