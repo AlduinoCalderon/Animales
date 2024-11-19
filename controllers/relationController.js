@@ -198,7 +198,7 @@ const getAnimalRelationsCount = async (req, res) => {
     try {
         // Consulta a la base de datos para contar las relaciones
         const count = await session.run(
-            `MATCH (a:Animal)-[r]->(p:Person)
+            `MATCH (a:Animal)<-[r]-(p:Person)
             WHERE a.id_animal = $animalId
             RETURN count(*) as relationCount`,
             { animalId }
