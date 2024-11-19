@@ -196,10 +196,10 @@ const getAnimalRelationsCount = async (req, res) => {
     const session = driver.session();
     const { animalId } = req.params.animalId;  // Accedemos al animalId de los parámetros de la ruta
     try {
+        console.log('animalId:', animalId);
         // Consulta a la base de datos para contar las relaciones
         const count = await session.run(
-            `MATCH (a:Animal)<-[r]-(p:Person)
-            WHERE a.id_animal = '$animalId'
+            `MATCH (p:Person)-[r]-(a:Animal {id_animal: $animalId}) 
             RETURN count(*) as relationCount`,
             { animalId }
         );
