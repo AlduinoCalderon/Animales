@@ -192,26 +192,35 @@ const deleteRelation = async (req, res) => {
 };
 // Este es un ejemplo general usando Neo4j
 // Modifica la función getAnimalRelationsCount
-const getAnimalRelationsCount = async (req, res) => {
+const getPersonRelations = async (req, res) => {
     const session = driver.session();
-    const { animalId } = req.params.animalId;  // Accedemos al animalId de los parámetros de la ruta
+    const { personId } = req.params;
+
     try {
-        console.log('animalId:', animalId);
-        // Consulta a la base de datos para contar las relaciones
-        const count = await session.run(
-            `MATCH (p:Person)-[r]-(a:Animal {id_animal: $animalId}) 
-            RETURN count(*) as relationCount`,
-            { animalId }
+        const result = await session.run(
+            'MATCH (a:Animal)<-[r]-(p:Person{id: $personId}) RETURN r, p', 
+            { personId }  
         );
 
-        const relationCount = count.records[0].get('relationCount');
+        if (result.records.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron relaciones para esta persona' });
+        }
+
+        const relations = result.records.map(record => {
+            return {
+                relationType: record.get('r').type,
+                relationData: record.get('r').properties,
+                animal: record.get('a').properties
+            };
+        });
+
         res.status(200).json({
-            message: 'Conteo de relaciones obtenido correctamente',
-            data: { relationCount }
+            message: 'Relaciones obtenidas correctamente',
+            data: relations
         });
     } catch (error) {
-        console.error('Error al obtener el conteo de relaciones:', error);
-        res.status(500).json({ message: 'Error al obtener el conteo de relaciones' });
+        console.error('Error al obtener relaciones:', error);
+        res.status(500).json({ message: 'Error obteniendo relaciones' });
     }
 };
 
@@ -220,7 +229,7 @@ const getAnimalRelationsCount = async (req, res) => {
 module.exports = {
     createRelation,
     getAnimalRelations,
-    getAnimalRelationsCount,
+    getPersonRelations,
     getRelation,
     updateRelation,
     deleteRelation
