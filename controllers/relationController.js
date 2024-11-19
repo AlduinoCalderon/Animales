@@ -198,7 +198,7 @@ const getPersonRelations = async (req, res) => {
 
     try {
         const result = await session.run(
-            'MATCH (a:Animal)<-[r]-(p:Person{id: $personId}) RETURN r, a', 
+            'MATCH (a:Animal)<-[r]-(p:Person{id: $personId}) RETURN a, r', 
             { personId }  
         );
 
