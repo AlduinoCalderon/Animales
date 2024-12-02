@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const getAllAnimals = async (req, res) => {
     const session = driver.session(); // Crea una nueva sesión
     try {
-        const result = await session.run('MATCH (a:Animal) RETURN a');
+        const result = await session.run('MATCH (a:Animal) where a.deleted = false RETURN a');
         const animals = result.records.map(record => ({
             id: record.get('a').properties.id_animal,
             species: record.get('a').properties.species,
