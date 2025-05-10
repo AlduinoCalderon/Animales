@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const personRoutes = require('../routes/personRoutes');
 const animalRoutes = require('../routes/animalRoutes');
 const relationRoutes = require('../routes/relationRoutes');
+const healthRoutes = require('../routes/healthRoutes');
 const neo4j = require('../database/neo4j'); // Conexión a Neo4j
 
 class Server {
@@ -67,6 +68,7 @@ class Server {
         this.app.use('/persons', personRoutes);
         this.app.use('/animals', animalRoutes);
         this.app.use('/relations', relationRoutes);
+        this.app.use('/', healthRoutes);
     }
 
     listen() {
