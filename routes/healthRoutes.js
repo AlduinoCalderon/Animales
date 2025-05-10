@@ -11,9 +11,12 @@ router.get('/health', async (req, res) => {
         // Verificar la conexión a Neo4j
         const result = await session.run('RETURN 1 as test');
         
+        // Eliminar el nodo de salud anterior
+        await session.run('MATCH (h:Health) DELETE h');
+        
         // Crear un nuevo nodo de salud
         await session.run(
-            'MATCH (h:Health) DELETE h; CREATE (h:Health {timestamp: $timestamp, status: "healthy"})',
+            'CREATE (h:Health {timestamp: $timestamp, status: "healthy"})',
             { timestamp }
         );
         
